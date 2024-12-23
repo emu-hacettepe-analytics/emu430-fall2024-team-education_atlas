@@ -1,1 +1,29 @@
-/* css styles */
+
+.navbar {
+  background-color: #2c2c2c; 
+  padding: 5px 15px; 
+  height: 40px; 
+  border-bottom: 1px solid #444444; 
+}
+
+
+.navbar a {
+  color: #ffffff; 
+  text-decoration: none; 
+  line-height: 40px; 
+  font-size: 13px; 
+}
+
+
+.navbar a:hover {
+  color: #cccccc; 
+}
+
+
+.navbar a:active,
+.navbar a[aria-current="page"] {
+  color: #e0e0e0 !important;
+  font-weight: normal; 
+  background-color: transparent; 
+  text-decoration: none; 
+}
