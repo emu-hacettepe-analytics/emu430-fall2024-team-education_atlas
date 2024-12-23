@@ -3,9 +3,13 @@ title: "Team Education Atlas"
 sidebar: false 
 ---
 
-Welcome to our project webpage. We are team Education Atlas and we are exploring Turkey’s education data.
+#  {style="text-align: center;"}
 
-Please stay tuned to follow our project activities.
+![](images/Education-01.webp){fig-align="center" width="271"}
+
+*Welcome to our project webpage. We are team Education Atlas and we are exploring Turkey’s education data.*
+
+*Please stay tuned to follow our project activities.*
 
 # Team Members
 
@@ -15,7 +19,7 @@ Please stay tuned to follow our project activities.
 
 3.  [Serap Tunç](https://emu-hacettepe-analytics.github.io/emu430-fall2024-seraptunc/)
 
-# Project Topic
+# Project Topic {style="text-align: center;"}
 
 This project was conducted by considering the education data of TÜİK between 2008 and 2023. It focuses on examining the relationship between education attainment levels and population distribution in Turkey over time with a specific comparison. The analysis involves cleaning and preparing the dataset, identifying key trends, and visualizing population percentages by gender and education level using intuitive graphics. The project provides insights into changes in educational attainment patterns for men and women over the years. It slices the data by gender, year, and region, providing visual comparisons of population distributions across education levels. As a result, this project provides a comprehensive view of how educational attainment has changed over the years, providing valuable insights into societal progress and highlighting areas where further improvement is needed.
 
