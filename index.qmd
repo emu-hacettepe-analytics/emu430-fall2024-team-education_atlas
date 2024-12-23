@@ -13,11 +13,11 @@ sidebar: false
 
 # Team Members
 
-1.  [Melis Atay](https://emu-hacettepe-analytics.github.io/emu430-fall2024-melisatay/)
+-   [Melis Atay](https://emu-hacettepe-analytics.github.io/emu430-fall2024-melisatay/)
 
-2.  [Muammer Tiryaki](https://emu-hacettepe-analytics.github.io/emu430-fall2024-Muammer06/)
+-   [Muammer Tiryaki](https://emu-hacettepe-analytics.github.io/emu430-fall2024-Muammer06/)
 
-3.  [Serap Tunç](https://emu-hacettepe-analytics.github.io/emu430-fall2024-seraptunc/)
+-   [Serap Tunç](https://emu-hacettepe-analytics.github.io/emu430-fall2024-seraptunc/)
 
 # Project Topic {style="text-align: center;"}
 

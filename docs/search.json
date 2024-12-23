@@ -25,6 +25,13 @@
     "href": "data.html",
     "title": "Data",
     "section": "",
-    "text": "Data source: xxx\n\n\n\n Back to top"
+    "text": "1. General Information About Data\nThe Turkish Statistical Institute (TÜİK) is motivated to ensure the production, publication and distribution of necessary statistics while compiling Turkey’s education data and information. TÜİK collects data from individuals, households, workplaces through surveys and censuses. The education data it collects helps to compare education information and gives an idea of ​​what education needs a country has for its development.\nData Source: TÜİK\n\n\n2. Why We Choose Data and Our Purposes\nAs part of the EMU430 course, we decided to examine the National Education Statistics dataset published by the Turkish Statistical Institute (TÜİK). This dataset provides comprehensive information about the state of education in Turkey. It is particularly suitable for analyzing issues such as reading rates, gender differences in education, and regional education levels.\nEducation plays a key role in the development of a society. Therefore, by choosing this dataset for our project, we aim to determine the strengths of Turkey’s education system and areas that need improvement. We plan to make important inferences about education with this data.\nThe main goal of our project is to conduct an in-depth analysis of the state and trends of education in Turkey. In this context, we will seek answers to the following questions:\nAre there differences in education levels between genders? Has education equality been achieved regionally? How has the level of education in Turkey progressed over the years?\nBy answering these questions, we aim to understand the problems in the education system and develop suggestions that can contribute to education policies in Turkey.\n\n\n3. Data Preprocessing and EDA Analysis\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "index.html#team-members",
+    "href": "index.html#team-members",
+    "title": "Education Atlas’s Project Lab",
+    "section": "",
+    "text": "Melis Atay Muammer Tiryaki Serap Tunç"
   }
 ]
