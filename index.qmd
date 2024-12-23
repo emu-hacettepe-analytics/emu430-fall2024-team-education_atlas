@@ -1,24 +1,26 @@
 ---
-title: "Team XXX"
+title: "Team Education Atlas"
 sidebar: false 
 ---
 
-This is our project webpage.
+Welcome to our project webpage. We are team Education Atlas and we are exploring Turkey’s education data.
 
 Please stay tuned to follow our project activities.
 
-This is our template.
-
 # Team Members
 
-1.  [Edin_Džeko](https://tr.wikipedia.org/wiki/Edin_D%C5%BEeko)
+1.  [Melis Atay](https://emu-hacettepe-analytics.github.io/emu430-fall2024-melisatay/)
 
-2.  [Dušan Tadić](https://tr.wikipedia.org/wiki/Du%C5%A1an_Tadi%C4%87)
+2.  [Muammer Tiryaki](https://emu-hacettepe-analytics.github.io/emu430-fall2024-Muammer06/)
 
-3.  [Frederico Rodrigues de Paula Santos](https://tr.wikipedia.org/wiki/Fred_(1993_do%C4%9Fumlu_futbolcu))
-
-4.  [Sebastian Szymański](https://tr.wikipedia.org/wiki/Sebastian_Szyma%C5%84ski)
+3.  [Serap Tunç](https://emu-hacettepe-analytics.github.io/emu430-fall2024-seraptunc/)
 
 # Project Topic
 
+This project was conducted by considering the education data of TÜİK between 2008 and 2023. It focuses on examining the relationship between education attainment levels and population distribution in Turkey over time with a specific comparison. The analysis involves cleaning and preparing the dataset, identifying key trends, and visualizing population percentages by gender and education level using intuitive graphics. The project provides insights into changes in educational attainment patterns for men and women over the years. It slices the data by gender, year, and region, providing visual comparisons of population distributions across education levels. As a result, this project provides a comprehensive view of how educational attainment has changed over the years, providing valuable insights into societal progress and highlighting areas where further improvement is needed.
+
 # Data Set
+
+[Education Data Set 1](https://github.com/emu-hacettepe-analytics/emu430-fall2024-team-education_atlas/raw/master/docs/education_data_1.xls)
+
+[Education Data Set 2](https://github.com/emu-hacettepe-analytics/emu430-fall2024-team-education_atlas/raw/master/docs/education_data_2.xls)
