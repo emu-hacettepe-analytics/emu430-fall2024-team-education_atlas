@@ -20,4 +20,4 @@ Are there differences in education levels between genders? Has education equalit
 
 By answering these questions, we aim to understand the problems in the education system and develop suggestions that can contribute to education policies in Turkey.
 
-# 3. **Data Preprocessing and EDA Analysis**
+# 3. Data Preprocessing and EDA Analysis
