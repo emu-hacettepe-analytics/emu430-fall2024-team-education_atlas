@@ -1,7 +1,7 @@
 ---
 title: "Team Education Atlas"
 format: 
-  pdf:
+  html:
     documentclass: scrartcl
     classoption: 
       - "DIV=11"
