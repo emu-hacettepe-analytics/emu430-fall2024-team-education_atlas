@@ -2,8 +2,144 @@
 title: "Analysis"
 ---
 
-About this site
 
-```{r}
-1 + 1
+
+
+::: {.cell}
+<img src="gender_inequality_pie_chart_by_level.gif" alt="Kadın-Erkek Farkı Isı Dağılım Grafiği" style="width: 100%; display: block; margin: 0 auto;" />
+
+
+::: {.cell}
+<img src="gender_difference_heatmap.gif" alt="Kadın-Erkek Farkı Isı Dağılım Grafiği" style="width: 100%; display: block; margin: 0 auto;" />
+
+
+
+
+
+
+```{python}
+import pandas as pd
+
+# Veri setini yükle ve tamamen boş sütunları kaldır
+df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+
+# Yılları ve indeks aralıklarını tanımla
+years = list(range(2008, 2024))  # 2008'den 2023'e kadar
+index_ranges = [(1 + i * 82, 1 + (i + 1) * 82) for i in range(len(years))]
+
+# Her yıl için alt veri çerçevelerini oluştur
+yearly_data = {}
+for year, (start, end) in zip(years, index_ranges):
+    yearly_data[year] = df.iloc[start:end]
+
+# İlk birkaç yılın veri çerçevelerini kontrol et
+sample_years = {year: data.head(1) for year, data in list(yearly_data.items())[:3]}
+
+# İlk iki satırı başlık olarak kullan ve eksik değerleri doldur
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Çok seviyeli (MultiIndex) başlıklar oluştur
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+
+# İlk iki satırı kaldır ve veri setini sıfırla
+df = df.iloc[2:].reset_index(drop=True)
+
+# İlk 3 sütun için tek seviyeli başlıklar oluştur
+first_three_headers = ['Yıl', 'İl Kodu', 'İl Adı']
+
+# Ana başlıklar ve alt başlıkları tanımla
+main_headers = [
+    'Genel toplam', 'Okuma yazma bilmeyen', 'Okuma yazma bilen fakat bir okul bitirmeyen',
+    'İlkokul', 'İlköğretim', 'Ortaokul ve dengi meslek', 'Lise ve dengi meslek',
+    'Yüksekokul veya fakülte', 'Yüksek lisans', 'Doktora', 'Bilinmeyen'
+]
+sub_headers = ['Toplam', 'Erkek', 'Kadın']
+
+# Çok seviyeli başlıkları oluştur
+remaining_headers = [(main, sub) for main in main_headers for sub in sub_headers]
+
+# Tüm başlıkları birleştir
+final_headers = first_three_headers + remaining_headers[:df.shape[1] - len(first_three_headers)]
+
+df.columns = pd.MultiIndex.from_tuples(
+    [(header, '') if isinstance(header, str) else header for header in final_headers]
+)
+
+if isinstance(df.columns, pd.MultiIndex):
+    df.columns = ['_'.join(map(str, col)).strip() if isinstance(col, tuple) else col for col in df.columns]
+
+# Yıl sütununu bul
+year_column = [col for col in df.columns if 'Yıl' in col]
+if not year_column:
+    raise KeyError("Veri setinde 'Yıl' sütunu bulunamadı.")
+year_column = year_column[0]
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from PIL import Image
+import os
+import plotly.express as px
+import plotly.graph_objects as go
+import json
+
+def create_turkey_interactive_map(df):
+    """
+    Türkiye haritası üzerinde şehir bazında kadın-erkek farkını gösteren etkileşimli bir harita oluşturur.
+    Yıl seçildiğinde, ilgili yılın haritası gösterilir.
+    """
+    city_column = [col for col in df.columns if 'İl Adı' in col][0]
+    year_column = [col for col in df.columns if 'Yıl' in col][0]
+    years = df[year_column].dropna().unique()
+    
+    # JSON dosyasını doğrula
+    geojson_path = 'data/tr-cities.json'
+    if not os.path.exists(geojson_path):
+        raise FileNotFoundError("GeoJSON dosyası bulunamadı: data/tr-cities.json")
+    
+    with open(geojson_path) as f:
+        geojson = json.load(f)
+    
+    dropdown_options = [
+        {'label': str(year), 'method': 'update', 'args': [{'visible': [year == y for y in years]}, {'title': f'Kadın-Erkek Farkı Haritası - {year}'}]}
+        for year in years
+    ]
+    
+    fig = go.Figure()
+    for year in years:
+        df_year = df.loc[df[year_column] == year].copy()
+        df_year = df_year.copy()
+        df_year['Difference'] = df_year['Genel toplam_Kadın'] - df_year['Genel toplam_Erkek']
+        fig.add_trace(
+            go.Choropleth(
+                geojson=geojson,
+                locations=df_year[city_column],
+                z=df_year['Difference'],
+                featureidkey='properties.number',
+                colorscale='RdBu',
+                colorbar_title='Fark',
+                visible=(year == years[0])
+            )
+        )
+    
+    fig.update_layout(
+        title_text='Yıla Göre Kadın-Erkek Farkı Haritası',
+        geo=dict(
+            fitbounds="locations",
+            visible=True
+        ),
+        updatemenus=[{'buttons': dropdown_options, 'direction': 'down', 'showactive': True}]
+    )
+    
+    fig.show()
+
+# Örnek kullanım
+# create_turkey_interactive_map(df)
+
+create_turkey_interactive_map(df)
+
+
 ```

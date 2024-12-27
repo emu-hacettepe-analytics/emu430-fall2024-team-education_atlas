@@ -21,3 +21,236 @@ Are there differences in education levels between genders? Has education equalit
 By answering these questions, we aim to understand the problems in the education system and develop suggestions that can contribute to education policies in Turkey.
 
 # 3. Data Preprocessing and EDA Analysis
+
+
+---
+title: "Data Preprocessing Report"
+author: "Project Team"
+date: today
+format: 
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: true
+    code-summary: "Code Details"
+execute:
+  echo: true
+  warning: false
+  error: true
+---
+
+# 📊 Introduction
+
+This project aims to analyze **educational data from 2008 to 2023**. The following preprocessing steps prepare the dataset for analysis:
+
+1. Data loading and removal of empty columns  
+2. Partitioning data by years  
+3. Column header adjustment  
+4. Creating multi-level column headers  
+
+---
+
+# ⚙️ Step 1: Data Loading and Cleaning
+
+The dataset is loaded using Python's `pandas` library, and completely empty columns are removed.
+
+```python
+import pandas as pd
+
+# Load the dataset and remove completely empty columns
+df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+```
+
+**Description:**  
+- The dataset is loaded using the `pandas` library.  
+- Completely empty columns are removed from the dataset.
+
+---
+
+# 📅 Step 2: Partitioning Data by Years
+
+The dataset is partitioned into separate data frames for each year.
+
+```python
+# Define years and index ranges
+years = list(range(2008, 2024))  # From 2008 to 2023
+index_ranges = [(1 + i * 82, 1 + (i + 1) * 82) for i in range(len(years))]
+
+# Create sub-data frames for each year
+yearly_data = {}
+for year, (start, end) in zip(years, index_ranges):
+    yearly_data[year] = df.iloc[start:end]
+```
+
+**Description:**  
+- The dataset is partitioned into yearly data frames.  
+- Index ranges are calculated for each year.
+
+---
+
+# 🔍 Step 3: Viewing Sample Years
+
+Sample records from the first three years are examined.
+
+```python
+# Inspect sample data frames from the first few years
+sample_years = {year: data.head(1) for year, data in list(yearly_data.items())[:3]}
+
+# Display sample data for verification
+for year, sample in sample_years.items():
+    print(f"Sample data for year {year}:")
+    print(sample)
+```
+
+**Description:**  
+- Data frames for the first three years are inspected.  
+- Header structure is validated.  
+- Sample data from the first row of each year's data frame is displayed.
+
+---
+
+# 📝 Step 4: Adjusting Column Headers
+
+The first two rows are used as column headers, and missing values are filled.
+
+```python
+# Use the first two rows as headers and fill missing values
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Create multi-level (MultiIndex) headers
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+
+# Remove the first two rows and reset the dataset
+df = df.iloc[2:].reset_index(drop=True)
+```
+
+**Description:**  
+- The first two rows are used as column headers.  
+- Missing values are filled (`bfill`).  
+- Multi-level headers are created.
+
+---
+
+# 📑 Step 5: Structuring Column Headers
+
+Column headers are further structured.
+
+```{python}
+# Create single-level headers for the first three columns
+first_three_headers = ['Year', 'Province Code', 'Province Name']
+
+# Define main and sub-headers
+main_headers = [
+    'Total', 'Illiterate', 'Literate but no diploma',
+    'Primary School', 'Secondary School', 'Middle School or Equivalent', 'High School or Equivalent',
+    'Higher Education', 'Master's Degree', 'Doctorate', 'Unknown'
+]
+sub_headers = ['Total', 'Male', 'Female']
+
+# Create multi-level headers
+remaining_headers = [(main, sub) for main in main_headers for sub in sub_headers]
+
+# Combine all headers
+final_headers = first_three_headers + remaining_headers[:df.shape[1] - len(first_three_headers)]
+
+df.columns = pd.MultiIndex.from_tuples(
+    [(header, '') if isinstance(header, str) else header for header in final_headers]
+)
+```
+
+**Description:**  
+- Single-level headers are assigned to the first three columns.  
+- Multi-level headers are created for remaining columns.  
+- Final column structure is established.
+
+---
+
+# 📊 Step 6: Data Structure Verification
+
+```python
+# Display dataset information
+print(df.info())
+
+# Display the first few rows of the dataset
+print(df.head())
+```
+
+```{python}
+import pandas as pd
+
+# Veri setini yükle ve tamamen boş sütunları kaldır
+df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+
+# Yılları ve indeks aralıklarını tanımla
+years = list(range(2008, 2024))  # 2008'den 2023'e kadar
+index_ranges = [(1 + i * 82, 1 + (i + 1) * 82) for i in range(len(years))]
+
+# Her yıl için alt veri çerçevelerini oluştur
+yearly_data = {}
+for year, (start, end) in zip(years, index_ranges):
+    yearly_data[year] = df.iloc[start:end]
+
+# İlk birkaç yılın veri çerçevelerini kontrol et
+sample_years = {year: data.head(1) for year, data in list(yearly_data.items())[:3]}
+
+# İlk iki satırı başlık olarak kullan ve eksik değerleri doldur
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Çok seviyeli (MultiIndex) başlıklar oluştur
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+
+# İlk iki satırı kaldır ve veri setini sıfırla
+df = df.iloc[2:].reset_index(drop=True)
+
+# İlk 3 sütun için tek seviyeli başlıklar oluştur
+first_three_headers = ['Yıl', 'İl Kodu', 'İl Adı']
+
+# Ana başlıklar ve alt başlıkları tanımla
+main_headers = [
+    'Genel toplam', 'Okuma yazma bilmeyen', 'Okuma yazma bilen fakat bir okul bitirmeyen',
+    'İlkokul', 'İlköğretim', 'Ortaokul ve dengi meslek', 'Lise ve dengi meslek',
+    'Yüksekokul veya fakülte', 'Yüksek lisans', 'Doktora', 'Bilinmeyen'
+]
+sub_headers = ['Toplam', 'Erkek', 'Kadın']
+
+# Çok seviyeli başlıkları oluştur
+remaining_headers = [(main, sub) for main in main_headers for sub in sub_headers]
+
+# Tüm başlıkları birleştir
+final_headers = first_three_headers + remaining_headers[:df.shape[1] - len(first_three_headers)]
+
+df.columns = pd.MultiIndex.from_tuples(
+    [(header, '') if isinstance(header, str) else header for header in final_headers]
+)
+
+print(df.loc[df['Yıl'] == 2009])
+```
+
+**Description:**  
+- The dataset's column structure is inspected.  
+- The first few rows are displayed to validate adjustments.
+
+---
+
+# ✅ Summary and Results
+
+After the preprocessing steps:
+
+1. The dataset was successfully loaded.  
+2. Yearly data partitioning was completed.  
+3. Multi-level column headers were structured.  
+4. Sample data from selected years was displayed for verification.  
+
+---
+
+# 🚀 Next Steps
+
+- Missing value analysis and filling strategies  
+- Data normalization and scaling  
+- Visualization and analysis steps  
+
+**This report provides a detailed overview of the data preprocessing steps and prepares the dataset for further analysis.** 🚀

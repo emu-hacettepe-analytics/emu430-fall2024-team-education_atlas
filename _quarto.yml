@@ -28,6 +28,19 @@ format:
   html:
     toc: true
     toc-location: left
+    code-fold: true
+    code-summary: "Kod Bloğunu Göster/Gizle"
+    execute:
+      echo: false
+      output: true
+      warning: false
+      error: true
+      cache: false
+    include-in-header:
+      - text: |
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    embed-resources: true
+    code-tools: true
     theme: 
       light: simplex 
       dark: cyborg
