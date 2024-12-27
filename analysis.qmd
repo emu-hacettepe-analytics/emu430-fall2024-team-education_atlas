@@ -118,10 +118,10 @@ top5_provinces = df_2023.nlargest(5, 'Education_Avg')[['İl Adı', 'Education_Av
 bottom5_provinces = df_2023.nsmallest(5, 'Education_Avg')[['İl Adı', 'Education_Avg']]
 
 # Sonuçları yazdır
-print("✅ En Yüksek Ortalama Eğitim Süresi Olan İller:")
+print("✅ Provinces with the Highest Average Years of Education:")
 print(top5_provinces)
 
-print("\n✅ En Düşük Ortalama Eğitim Süresi Olan İller:")
+print("\n✅ Provinces with the Lowest Average Years of Education:")
 print(bottom5_provinces)
 
 # Grafik oluşturma
@@ -207,10 +207,10 @@ top5_change = df_change.nlargest(5, 'Change_Rate')
 bottom5_change = df_change.nsmallest(5, 'Change_Rate')
 
 # Sonuçları yazdır
-print("✅ En Yüksek Eğitim Süresi Değişim Oranı Olan İller:")
+print("✅ Provinces with the Highest Change Rate in Years of Education:")
 print(top5_change[[province_column, 'Change_Rate']])
 
-print("✅ En Düşük Eğitim Süresi Değişim Oranı Olan İller:")
+print("✅ Provinces with the Lowest Change Rate in Years of Education:")
 print(bottom5_change[[province_column, 'Change_Rate']])
 
 # Grafik oluşturma

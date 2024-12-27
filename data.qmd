@@ -276,7 +276,7 @@ print(df.loc[df['Yıl'] == 2009])
 
 # 🚀 R'de .RData formatında kaydetmek için aşağıdaki komutları kullanabilirsiniz:
 
-```{Python}
+```{python}
 import pandas as pd
 
 # Veri setini yükle ve tamamen boş sütunları kaldır
