@@ -66,11 +66,13 @@ import os
 import plotly.express as px
 import plotly.graph_objects as go
 import json
+print(df.columns)
+
+
 
 def create_turkey_interactive_map(df):
     """
     Türkiye haritası üzerinde şehir bazında kadın-erkek farkını gösteren etkileşimli bir harita oluşturur.
-    Yıl seçildiğinde, ilgili yılın haritası gösterilir.
     """
     city_column = [col for col in df.columns if 'İl Adı' in col][0]
     year_column = [col for col in df.columns if 'Yıl' in col][0]
@@ -84,6 +86,10 @@ def create_turkey_interactive_map(df):
     with open(geojson_path) as f:
         geojson = json.load(f)
     
+    # Veri temizliği ve eşleştirme
+    df = clean_turkey_city_names(df)
+    df = map_city_numbers(df, geojson)
+    
     dropdown_options = [
         {'label': str(year), 'method': 'update', 'args': [{'visible': [year == y for y in years]}, {'title': f'Kadın-Erkek Farkı Haritası - {year}'}]}
         for year in years
@@ -92,12 +98,12 @@ def create_turkey_interactive_map(df):
     fig = go.Figure()
     for year in years:
         df_year = df.loc[df[year_column] == year].copy()
-        df_year = df_year.copy()
         df_year['Difference'] = df_year['Genel toplam_Kadın'] - df_year['Genel toplam_Erkek']
+        
         fig.add_trace(
             go.Choropleth(
                 geojson=geojson,
-                locations=df_year[city_column],
+                locations=df_year['CityNumber'],
                 z=df_year['Difference'],
                 featureidkey='properties.number',
                 colorscale='RdBu',
@@ -117,30 +123,42 @@ def create_turkey_interactive_map(df):
     
     fig.show()
 
-# Örnek kullanım
-# create_turkey_interactive_map(df)
 
+def clean_turkey_city_names(df):
+    """
+    Excel veri çerçevesindeki şehir adlarını temizler ve gerekli düzeltmeleri yapar.
+    """
+    # 'Türkiye' ve NaN satırlarını kaldır
+    df = df[~df['İl Adı_'].isin(['türkiye'])]
+    df = df.dropna(subset=['İl Adı_'])
+    
+    # Özel şehir adı düzeltmeleri
+    city_replacements = {
+        'afyonkarahisar': 'afyon',
+        'i̇çel': 'mersin'
+    }
+    df['İl Adı_'] = df['İl Adı_'].replace(city_replacements)
+    
+    return df
+
+
+def map_city_numbers(df, geojson):
+    """
+    Şehir adlarını şehir numaralarıyla eşleştirir.
+    """
+    city_mapping = {feature['properties']['name'].strip().lower(): str(feature['properties']['number']) for feature in geojson['features']}
+    df['İl Adı_'] = df['İl Adı_'].str.strip().str.lower()
+    df['CityNumber'] = df['İl Adı_'].map(city_mapping)
+    
+    # Eşleşmeyen şehirleri kontrol et
+    unmatched_cities = df.loc[df['CityNumber'].isnull(), 'İl Adı_']
+    if not unmatched_cities.empty:
+        print("⚠️ Hâlâ eşleşmeyen şehirler var:")
+        print(unmatched_cities.unique())
+    
+    return df
+
+
+# Veri temizliği ve harita oluşturma
+df = clean_turkey_city_names(df)
 create_turkey_interactive_map(df)
-
-# JSON dosyasını oku ve ilk birkaç satırı göster
-geojson_path = 'data/tr-cities.json'
-if not os.path.exists(geojson_path):
-    raise FileNotFoundError("GeoJSON dosyası bulunamadı: data/tr-cities.json")
-
-with open(geojson_path) as f:
-    geojson = json.load(f)
-
-# GeoJSON yapısını incele
-print("GeoJSON ilk 5 özellik (features) örneği:")
-print(pd.DataFrame(geojson['features']))
-
-
-# Test için şehirlerin isimlerini kontrol edin
-geojson_cities = [feature['properties']['name'] for feature in geojson['features']]
-df_cities = df["Adana"].unique()
-
-# Ortak şehirleri kontrol edin
-print(set(geojson_cities).intersection(set(df_cities)))
-print("Eşleşmeyen şehirler:")
-print(set(df_cities) - set(geojson_cities))
-

@@ -25,7 +25,7 @@ By answering these questions, we aim to understand the problems in the education
 
 ---
 title: "Data Preprocessing Report"
-author: "Project Team"
+author: "Education Atlas    "
 date: today
 format: 
   html:
@@ -50,6 +50,20 @@ This project aims to analyze **educational data from 2008 to 2023**. The followi
 
 ---
 
+# 🛠️ Step 0: Manual Data Preprocessing in Excel
+Before starting data analysis, the dataset was manually cleaned in Excel to ensure consistency and accuracy:
+
+1. Empty Columns Removed: Completely empty columns were deleted.
+2. City Name Standardization: Inconsistent city names (e.g., Afyonkarahisar → Afyon, İçel → Mersin) were corrected.
+3. Unnecessary Rows Cleared: Rows containing summary totals (e.g., labeled as Türkiye) and metadata were removed.
+4. Header Adjustments: Column headers were standardized, and missing values were filled.
+
+This cleaned dataset (yıllara_göre_egitim.xlsx) was then used for further processing in Python. 🚀
+
+
+
+
+
 # ⚙️ Step 1: Data Loading and Cleaning
 
 The dataset is loaded using Python's `pandas` library, and completely empty columns are removed.
@@ -58,7 +72,7 @@ The dataset is loaded using Python's `pandas` library, and completely empty colu
 import pandas as pd
 
 # Load the dataset and remove completely empty columns
-df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = pd.read_excel('data/yıllara_göre_egitim.xlsx')
 df = df.dropna(axis=1, how='all')
 ```
 
@@ -115,6 +129,16 @@ for year, sample in sample_years.items():
 The first two rows are used as column headers, and missing values are filled.
 
 ```python
+import pandas as pd
+df = pd.read_excel('data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+years = list(range(2008, 2024))  # From 2008 to 2023
+index_ranges = [(1 + i * 82, 1 + (i + 1) * 82) for i in range(len(years))]
+
+# Create sub-data frames for each year
+yearly_data = {}
+for year, (start, end) in zip(years, index_ranges):
+    yearly_data[year] = df.iloc[start:end]
 # Use the first two rows as headers and fill missing values
 header1 = df.iloc[0].bfill()
 header2 = df.iloc[1].bfill()
@@ -138,16 +162,35 @@ df = df.iloc[2:].reset_index(drop=True)
 Column headers are further structured.
 
 ```{python}
+import pandas as pd
+df = pd.read_excel('data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+years = list(range(2008, 2024))  # From 2008 to 2023
+index_ranges = [(1 + i * 82, 1 + (i + 1) * 82) for i in range(len(years))]
+
+# Create sub-data frames for each year
+yearly_data = {}
+for year, (start, end) in zip(years, index_ranges):
+    yearly_data[year] = df.iloc[start:end]
+# Use the first two rows as headers and fill missing values
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Create multi-level (MultiIndex) headers
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+
+# Remove the first two rows and reset the dataset
+df = df.iloc[2:].reset_index(drop=True)
 # Create single-level headers for the first three columns
 first_three_headers = ['Year', 'Province Code', 'Province Name']
 
 # Define main and sub-headers
 main_headers = [
-    'Total', 'Illiterate', 'Literate but no diploma',
-    'Primary School', 'Secondary School', 'Middle School or Equivalent', 'High School or Equivalent',
-    'Higher Education', 'Master's Degree', 'Doctorate', 'Unknown'
+    'Genel toplam', 'Okuma yazma bilmeyen', 'Okuma yazma bilen fakat bir okul bitirmeyen',
+    'İlkokul', 'İlköğretim', 'Ortaokul ve dengi meslek', 'Lise ve dengi meslek',
+    'Yüksekokul veya fakülte', 'Yüksek lisans', 'Doktora', 'Bilinmeyen'
 ]
-sub_headers = ['Total', 'Male', 'Female']
+sub_headers = ['Toplam', 'Erkek', 'Kadın']
 
 # Create multi-level headers
 remaining_headers = [(main, sub) for main in main_headers for sub in sub_headers]
@@ -228,7 +271,84 @@ df.columns = pd.MultiIndex.from_tuples(
 )
 
 print(df.loc[df['Yıl'] == 2009])
+
 ```
+
+# 🚀 R'de .RData formatında kaydetmek için aşağıdaki komutları kullanabilirsiniz:
+
+```{Python}
+import pandas as pd
+
+# Veri setini yükle ve tamamen boş sütunları kaldır
+df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+
+# Yılları ve indeks aralıklarını tanımla
+years = list(range(2008, 2024))  # 2008'den 2023'e kadar
+index_ranges = [(1 + i * 82, 1 + (i + 1) * 82) for i in range(len(years))]
+
+# Her yıl için alt veri çerçevelerini oluştur
+yearly_data = {}
+for year, (start, end) in zip(years, index_ranges):
+    yearly_data[year] = df.iloc[start:end]
+
+# İlk birkaç yılın veri çerçevelerini kontrol et
+sample_years = {year: data.head(1) for year, data in list(yearly_data.items())[:3]}
+
+# İlk iki satırı başlık olarak kullan ve eksik değerleri doldur
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Çok seviyeli (MultiIndex) başlıklar oluştur
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+
+# İlk iki satırı kaldır ve veri setini sıfırla
+df = df.iloc[2:].reset_index(drop=True)
+
+# İlk 3 sütun için tek seviyeli başlıklar oluştur
+first_three_headers = ['Yıl', 'İl Kodu', 'İl Adı']
+
+# Ana başlıklar ve alt başlıkları tanımla
+main_headers = [
+    'Genel toplam', 'Okuma yazma bilmeyen', 'Okuma yazma bilen fakat bir okul bitirmeyen',
+    'İlkokul', 'İlköğretim', 'Ortaokul ve dengi meslek', 'Lise ve dengi meslek',
+    'Yüksekokul veya fakülte', 'Yüksek lisans', 'Doktora', 'Bilinmeyen'
+]
+sub_headers = ['Toplam', 'Erkek', 'Kadın']
+
+# Çok seviyeli başlıkları oluştur
+remaining_headers = [(main, sub) for main in main_headers for sub in sub_headers]
+
+# Tüm başlıkları birleştir
+final_headers = first_three_headers + remaining_headers[:df.shape[1] - len(first_three_headers)]
+
+df.columns = pd.MultiIndex.from_tuples(
+    [(header, '') if isinstance(header, str) else header for header in final_headers]
+)
+
+# Veri setini bir dosyaya kaydet
+import pyreadr
+
+# Veri çerçevesini Rdata olarak kaydet
+pyreadr.write_rds('data/education_data.RData', df)
+```
+
+```{python}
+# Veri setini bir dosyaya kaydet
+import pyreadr
+
+# Veri çerçevesini Rdata olarak kaydet
+pyreadr.write_rds('education_data.RData', df)
+```
+# R'de kullanılmak üzere açıklama
+
+✅ Veri seti başarıyla kaydedildi: "data/education_data.RData"  
+[Rdata](education_data.RData)
+
+### Veri Seti Bağlantısı
+
+Veri setine [buradan ulaşabilirsiniz](education_data.RData).
+
 
 **Description:**  
 - The dataset's column structure is inspected.  

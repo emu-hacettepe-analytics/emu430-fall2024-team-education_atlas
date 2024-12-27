@@ -1,16 +1,305 @@
 ---
-title: "Analysis"
+title: "Educational Trends in Turkey (2008–2023)"
+format: html
 ---
 
+# 🚀 Higher Education Attainment Trends (2008–2023)
 
+**Key Insights:**  
+- The proportion of **associate degree, bachelor's degree, master's degree, and doctorate graduates** aged **25 and above** increased significantly from **9.8% in 2008** to **24.6% in 2023**.  
+- Similarly, the proportion of **secondary education and above graduates** rose from **26.5% in 2008** to **48.3% in 2023**.
 
+**Analysis:**  
+- This significant improvement indicates **increased access to higher education opportunities** in Turkey over the past 15 years.  
+- Policy reforms, educational infrastructure improvements, and increased participation of women in higher education likely contributed to this growth.  
+- Despite improvements, nearly **75.4% of the population aged 25 and above in 2023 still do not hold a university degree**, indicating room for further growth.
+
+**Implications:**  
+- Policies should focus on **bridging regional disparities** and **supporting economically disadvantaged groups** to access higher education.  
+- Investments in **lifelong learning programs** can target the adult population with limited formal education.
+
+---
 
 ::: {.cell}
 <img src="gender_inequality_pie_chart_by_level.gif" alt="Kadın-Erkek Farkı Isı Dağılım Grafiği" style="width: 100%; display: block; margin: 0 auto;" />
 
+---
+
+# 📚 Average Duration of Education (2023)
+
+**Key Insights:**  
+- In **2023**, the **average duration of education** for individuals aged **25 and over** was **9.3 years**.
+- **Gender Gap:**  
+   - Women: **8.6 years**  
+   - Men: **10.1 years**
+
+---
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Veri setini yükle ve tamamen boş sütunları kaldır
+df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+
+# İlk iki satırı başlık olarak kullan ve eksik değerleri doldur
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Çok seviyeli (MultiIndex) başlıklar oluştur
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+df = df.iloc[2:].reset_index(drop=True)
+
+# İlk 3 sütunu tek seviyeli başlık yap
+first_three_headers = ['Yıl', 'İl Kodu', 'İl Adı']
+
+# Ana başlıklar ve alt başlıkları tanımla
+main_headers = [
+    'Genel toplam', 'Okuma yazma bilmeyen', 'Okuma yazma bilen fakat bir okul bitirmeyen',
+    'İlkokul', 'İlköğretim', 'Ortaokul ve dengi meslek', 'Lise ve dengi meslek',
+    'Yüksekokul veya fakülte', 'Yüksek lisans', 'Doktora', 'Bilinmeyen'
+]
+sub_headers = ['Toplam', 'Erkek', 'Kadın']
+
+# Sütunları 3'erli gruplar hâlinde düzenle
+education_columns = []
+for main in main_headers:
+    for sub in sub_headers:
+        education_columns.append(f"{main}_{sub}")
+
+# Tüm başlıkları birleştir
+final_headers = first_three_headers + education_columns[:df.shape[1] - len(first_three_headers)]
+df.columns = final_headers
+
+# Yıl sütununu kontrol et
+df['Yıl'] = pd.to_numeric(df['Yıl'], errors='coerce')
+df = df.dropna(subset=['Yıl'])
+df['Yıl'] = df['Yıl'].astype(int)
+
+# 2023 yılı verilerini çek
+df_2023 = df[df['Yıl'] == 2023].copy()
+
+# Eğitim düzeylerine karşılık gelen yıl süreleri
+education_years = {
+    'Okuma yazma bilmeyen': 0,
+    'İlkokul': 5,
+    'İlköğretim': 8,
+    'Ortaokul ve dengi meslek': 8,
+    'Lise ve dengi meslek': 12,
+    'Yüksekokul veya fakülte': 16,
+    'Yüksek lisans': 18,
+    'Doktora': 22
+}
+
+# Eğitim süresi hesaplaması
+def calculate_avg_education_duration(row):
+    total_years = 0
+    total_students = 0
+    
+    for level, years in education_years.items():
+        col_name = f"{level}_Toplam"
+        if col_name in row.index and pd.notnull(row[col_name]):
+            total_years += row[col_name] * years
+            total_students += row[col_name]
+    
+    if total_students == 0:
+        return 0
+    return total_years / total_students
+
+# Ortalama eğitim süresi hesapla
+df_2023['Education_Avg'] = df_2023.apply(calculate_avg_education_duration, axis=1)
+
+# 'Türkiye' satırını çıkar
+df_2023 = df_2023[~df_2023['İl Adı'].str.contains('Türkiye', case=False, na=False)]
+
+# En yüksek ve en düşük ortalamaya sahip illeri bul
+top5_provinces = df_2023.nlargest(5, 'Education_Avg')[['İl Adı', 'Education_Avg']]
+bottom5_provinces = df_2023.nsmallest(5, 'Education_Avg')[['İl Adı', 'Education_Avg']]
+
+# Sonuçları yazdır
+print("✅ En Yüksek Ortalama Eğitim Süresi Olan İller:")
+print(top5_provinces)
+
+print("\n✅ En Düşük Ortalama Eğitim Süresi Olan İller:")
+print(bottom5_provinces)
+
+# Grafik oluşturma
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.bar(top5_provinces['İl Adı'], top5_provinces['Education_Avg'], color='skyblue', label='Highest Average')
+ax.bar(bottom5_provinces['İl Adı'], bottom5_provinces['Education_Avg'], color='orange', label='Lowest Average')
+
+ax.set_xlabel('Provinces')
+ax.set_ylabel('Average Education Duration (Years)')
+ax.set_title('Highest and Lowest Average Education Duration by Province (2023)')
+ax.legend()
+plt.xticks(rotation=30, ha='right')
+plt.tight_layout()
+plt.show()
+
+
+```
+
+
+---
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Veri setini yükle ve tamamen boş sütunları kaldır
+df = pd.read_excel('/home/mami/emu430/emu430-fall2024-team-education_atlas/data/yıllara_göre_egitim.xlsx')
+df = df.dropna(axis=1, how='all')
+
+# İlk iki satırı başlık olarak kullan ve eksik değerleri doldur
+header1 = df.iloc[0].bfill()
+header2 = df.iloc[1].bfill()
+
+# Çok seviyeli (MultiIndex) başlıklar oluştur
+df.columns = pd.MultiIndex.from_tuples(zip(header1, header2))
+df = df.iloc[2:].reset_index(drop=True)
+
+# Çok seviyeli sütunları birleştir
+df.columns = ['_'.join(map(str, col)).strip() if isinstance(col, tuple) else col for col in df.columns]
+
+# Yıl sütununu bul ve adını kontrol et
+year_column = [col for col in df.columns if 'Yıl' in col or 'Unnamed: 0' in col]
+if not year_column:
+    raise KeyError("Veri setinde 'Yıl' sütunu bulunamadı.")
+year_column = year_column[0]  # İlk eşleşeni al
+
+# Yıl sütununu düzenle
+df['Yıl'] = pd.to_numeric(df[year_column], errors='coerce')
+df = df.dropna(subset=['Yıl'])
+df['Yıl'] = df['Yıl'].astype(int)
+
+# İl Adı sütununu kontrol et
+province_column = [col for col in df.columns if 'İl Adı' in col or 'Unnamed: 2' in col]
+if not province_column:
+    raise KeyError("Veri setinde 'İl Adı' sütunu bulunamadı.")
+province_column = province_column[0]  # İlk eşleşeni al
+
+# 2014 ve 2023 verilerini çek
+df_2014 = df[df['Yıl'] == 2014].copy()
+df_2023 = df[df['Yıl'] == 2023].copy()
+
+# Eğitim sürelerini hesapla
+education_columns = [col for col in df.columns if 'Toplam' in col and 'Genel toplam' not in col]
+df_2014['Education_Avg'] = df_2014[education_columns].mean(axis=1)
+df_2023['Education_Avg'] = df_2023[education_columns].mean(axis=1)
+
+# İl bazında ortalama eğitim süresindeki değişim oranını hesapla
+df_change = pd.merge(
+    df_2014[[province_column, 'Education_Avg']],
+    df_2023[[province_column, 'Education_Avg']],
+    on=province_column,
+    suffixes=('_2014', '_2023')
+)
+df_change['Change_Rate'] = ((df_change['Education_Avg_2023'] - df_change['Education_Avg_2014']) / df_change['Education_Avg_2014']) * 100
+
+# Tür dönüşümü ve geçersiz değerlerin temizlenmesi
+df_change['Change_Rate'] = pd.to_numeric(df_change['Change_Rate'], errors='coerce')
+df_change = df_change.dropna(subset=['Change_Rate'])
+
+# En yüksek ve en düşük değişim oranına sahip illeri belirle
+top5_change = df_change.nlargest(5, 'Change_Rate')
+bottom5_change = df_change.nsmallest(5, 'Change_Rate')
+
+# Sonuçları yazdır
+print("✅ En Yüksek Eğitim Süresi Değişim Oranı Olan İller:")
+print(top5_change[[province_column, 'Change_Rate']])
+
+print("✅ En Düşük Eğitim Süresi Değişim Oranı Olan İller:")
+print(bottom5_change[[province_column, 'Change_Rate']])
+
+# Grafik oluşturma
+fig, ax = plt.subplots(figsize=(12, 7))
+
+# En yüksek değişim oranları
+ax.bar(top5_change[province_column], top5_change['Change_Rate'], color='green', label='Highest Improvement')
+
+# En düşük değişim oranları
+ax.bar(bottom5_change[province_column], bottom5_change['Change_Rate'], color='red', label='Lowest Improvement')
+
+# Grafik detayları
+ax.set_title('Highest and Lowest Improvement in Education Duration (2014–2023)')
+ax.set_xlabel('Provinces')
+ax.set_ylabel('Change Rate (%)')
+ax.legend()
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+
+```
+
+---
+
+# 📈 Literacy Rates (2008–2023)
+
+**Key Insights:**  
+- The literacy rate among individuals aged **6 years and over** increased from **91.8% in 2008** to **97.6% in 2023**.  
+- **Women:** Improved from **86.9%** to **96.0%**.  
+- **Men:** Improved from **96.7%** to **99.2%**.
+
+**Analysis:**  
+- The significant improvement in women's literacy rates suggests a **successful reduction in gender disparity** in education.  
+- Despite the progress, the remaining **4% illiteracy rate** among women indicates persistent **cultural and socio-economic barriers** in certain regions.
+
+**Implications:**  
+- Adult literacy programs targeting women in rural and underserved areas remain critical.  
+- Efforts should focus on **ensuring literacy for the remaining 4% of the population**, particularly women in remote areas.
+
+---
 
 ::: {.cell}
 <img src="gender_difference_heatmap.gif" alt="Kadın-Erkek Farkı Isı Dağılım Grafiği" style="width: 100%; display: block; margin: 0 auto;" />
+
+---
+
+# 👩‍🎓👨‍🎓 Parental Education Influence
+
+**Key Insights:**
+- **Mothers with Higher Education:**  
+   - 84.6% of their children completed **higher education**.  
+   - 12.5% completed **secondary education**.  
+   - 2.9% completed **lower secondary education**.
+- **Fathers with Higher Education:**  
+   - 80.2% completed **higher education**.  
+   - 16.0% completed **secondary education**.  
+   - 3.8% completed **lower secondary education**.
+
+**Parents with Secondary Education:**  
+- **Mothers:** 64.3% attained **higher education**.  
+- **Fathers:** 55.4% attained **higher education**.
+
+**Parents with Lower Secondary Education:**  
+- **Mothers:** 27.9% attained **higher education**.  
+- **Fathers:** 26.6% attained **higher education**.
+
+**Analysis:**  
+- There is a **strong correlation between parental education levels and children's educational outcomes**.
+- **Mothers' education level** appears to have a slightly stronger influence than fathers'.
+
+**Implications:**  
+- Supporting **parental education initiatives** can break the cycle of low educational attainment.  
+- Programs targeting parents in low-education regions could indirectly improve children's education levels.
+
+---
+
+# 📝 General Recommendations
+
+1. **Focus on Regional Disparities:** Prioritize investment in provinces with lower education durations.
+2. **Close the Gender Gap:** Launch **gender-specific education campaigns**.
+3. **Adult Education Programs:** Expand literacy and education programs.
+4. **Parental Education Awareness:** Implement campaigns for **parental influence** in education.
+5. **Sustain Urban Improvements:** Emphasize **lifelong learning programs**.
+
+**Conclusion:** Significant progress has been made, but **regional disparities, gender gaps, and parental influence** remain key areas for intervention. A strategic, inclusive approach will drive sustainable improvements in Turkey's education landscape.
+
+
+
 
 
 
@@ -76,6 +365,7 @@ if not year_column:
     raise KeyError("Veri setinde 'Yıl' sütunu bulunamadı.")
 year_column = year_column[0]
 
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -86,10 +376,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 
+
+
 def create_turkey_interactive_map(df):
     """
-    Türkiye haritası üzerinde şehir bazında kadın-erkek farkını gösteren etkileşimli bir harita oluşturur.
-    Yıl seçildiğinde, ilgili yılın haritası gösterilir.
+    Türkiye haritası üzerinde şehir bazında kadın-erkek farkını ve belirli başlıklardaki cinsiyet eşitsizlik indekslerini gösteren etkileşimli bir harita oluşturur.
     """
     city_column = [col for col in df.columns if 'İl Adı' in col][0]
     year_column = [col for col in df.columns if 'Yıl' in col][0]
@@ -103,30 +394,47 @@ def create_turkey_interactive_map(df):
     with open(geojson_path) as f:
         geojson = json.load(f)
     
+    # Veri temizliği ve eşleştirme
+    df = clean_turkey_city_names(df)
+    df = map_city_numbers(df, geojson)
+    df = calculate_gender_inequality_indices(df)
+    
     dropdown_options = [
-        {'label': str(year), 'method': 'update', 'args': [{'visible': [year == y for y in years]}, {'title': f'Kadın-Erkek Farkı Haritası - {year}'}]}
+        {'label': str(year), 'method': 'update', 'args': [{'visible': [year == y for y in years]}, {'title': f'Cinsiyet Eşitsizlik İndeksi - {year}'}]}
         for year in years
     ]
     
     fig = go.Figure()
     for year in years:
         df_year = df.loc[df[year_column] == year].copy()
-        df_year = df_year.copy()
-        df_year['Difference'] = df_year['Genel toplam_Kadın'] - df_year['Genel toplam_Erkek']
+        
+        # Hover metni için gerekli bilgiler
+        df_year['hover_text'] = (
+            'Şehir: ' + df_year[city_column] + '<br>' +
+            'Genel Toplam Eşitsizlik: ' + df_year['Genel toplam_Eşitsizlik'].astype(str) + '<br>' +
+            'Okuma Yazma Bilmeyen: ' + df_year['Okuma yazma bilmeyen_Eşitsizlik'].astype(str) + '<br>' +
+            'Yüksekokul veya Fakülte: ' + df_year['Yüksekokul veya fakülte_Eşitsizlik'].astype(str)
+        )
+        
+        # Harita katmanı oluştur
         fig.add_trace(
             go.Choropleth(
                 geojson=geojson,
-                locations=df_year[city_column],
-                z=df_year['Difference'],
+                locations=df_year['CityNumber'],
+                z=df_year['Genel toplam_Eşitsizlik'],
+                text=df_year['hover_text'],
+                hoverinfo='text',
                 featureidkey='properties.number',
-                colorscale='RdBu',
-                colorbar_title='Fark',
+                colorscale='YlGnBu',  # Düşük eşitsizlik: Yeşil | Yüksek eşitsizlik: Kırmızı
+                zmin=0,
+                zmax=df_year['Genel toplam_Eşitsizlik'].max(),
+                colorbar_title='Eşitsizlik İndeksi',
                 visible=(year == years[0])
             )
         )
     
     fig.update_layout(
-        title_text='Yıla Göre Kadın-Erkek Farkı Haritası',
+        title_text='Yıla Göre Cinsiyet Eşitsizlik İndeksi Haritası',
         geo=dict(
             fitbounds="locations",
             visible=True
@@ -136,10 +444,64 @@ def create_turkey_interactive_map(df):
     
     fig.show()
 
-# Örnek kullanım
-# create_turkey_interactive_map(df)
+def clean_turkey_city_names(df):
+    """
+    Excel veri çerçevesindeki şehir adlarını temizler ve gerekli düzeltmeleri yapar.
+    """
+    # 'Türkiye' ve NaN satırlarını kaldır
+    df = df[~df['İl Adı_'].isin(['türkiye'])]
+    df = df.dropna(subset=['İl Adı_'])
+    
+    # Özel şehir adı düzeltmeleri
+    city_replacements = {
+        'Afyonkarahisar': 'Afyon',
+        'i̇çel': 'mersin'
+    }
+    df['İl Adı_'] = df['İl Adı_'].replace(city_replacements)
+    
+    return df
 
+
+def map_city_numbers(df, geojson):
+    """
+    Şehir adlarını şehir numaralarıyla eşleştirir.
+    """
+    city_mapping = {feature['properties']['name'].strip().lower(): str(feature['properties']['number']) for feature in geojson['features']}
+    df['İl Adı_'] = df['İl Adı_'].str.strip().str.lower()
+    df['CityNumber'] = df['İl Adı_'].map(city_mapping)
+    
+    # Eşleşmeyen şehirleri kontrol et
+    unmatched_cities = df.loc[df['CityNumber'].isnull(), 'İl Adı_']
+    #if not unmatched_cities.empty:
+    #    print("⚠️ Hâlâ eşleşmeyen şehirler var:")
+    #    print(unmatched_cities.unique())
+    
+    return df
+
+
+def calculate_gender_inequality_indices(df):
+    """
+    Her ana başlık için cinsiyet eşitsizlik indekslerini hesaplar ve veri çerçevesine ekler.
+    """
+    main_headers = [
+        'Genel toplam', 'Okuma yazma bilmeyen', 'Okuma yazma bilen fakat bir okul bitirmeyen',
+        'İlkokul', 'İlköğretim', 'Ortaokul ve dengi meslek', 'Lise ve dengi meslek',
+        'Yüksekokul veya fakülte', 'Yüksek lisans', 'Doktora', 'Bilinmeyen'
+    ]
+    
+    for header in main_headers:
+        female_col = f"{header}_Kadın"
+        male_col = f"{header}_Erkek"
+        total_col = f"{header}_Toplam"
+        
+        if female_col in df.columns and male_col in df.columns and total_col in df.columns:
+            df[f"{header}_Eşitsizlik"] = (df[female_col] - df[male_col]).abs() / df[total_col]
+    
+    return df
+
+
+
+# Veri temizliği ve harita oluşturma
+df = clean_turkey_city_names(df)
 create_turkey_interactive_map(df)
-
-
 ```

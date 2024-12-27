@@ -1,11 +1,30 @@
 ---
 title: "Team Education Atlas"
-sidebar: false 
+format: 
+  pdf:
+    documentclass: scrartcl
+    classoption: 
+      - "DIV=11"
+      - "numbers=noendperiod"
+    geometry: margin=1in
+    header-includes: 
+      - \usepackage{float}
+      - \floatplacement{figure}{H}
+    fontsize: 11pt
+    toc: true
+    toc-depth: 2
+    fig-cap-location: bottom
+    code-block-bg: true
+    colorlinks: true
+    linkcolor: blue
+    urlcolor: blue
+    citecolor: blue
 ---
+
 
 #  {style="text-align: center;"}
 
-![](images/Education-01.webp){fig-align="center" width="271"}
+![](images/Education-01.png){fig-align="center" width="271"}
 
 *Welcome to our project webpage. We are team Education Atlas and we are exploring Turkey’s education data.*
 
@@ -27,4 +46,3 @@ This project was conducted by considering the education data of TÜİK between 2
 
 [Education Data Set 1](https://github.com/emu-hacettepe-analytics/emu430-fall2024-team-education_atlas/raw/master/docs/education_data_1.xls)
 
-[Education Data Set 2](https://github.com/emu-hacettepe-analytics/emu430-fall2024-team-education_atlas/raw/master/docs/education_data_2.xls)
